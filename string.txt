@@ -1,0 +1,37 @@
+比如 String s = “abc”。对于“abc”，它首先是一个String literal，它在创建之后，立即利用String的intern方法，装入到了Literal Pool并返回这个String 实例的引用给s。当你再次写abc”的时候，intern方法会先查看是否已有这个literal了，就会直接返回这个literal对应的String实例的引用。也就是说你循环1000变，内存里面也只有这么一个String literal以及他对应的String的实例。String，本质上是一个Java 类，它的实例除了包含value，也就是这个字符序列外，还有其他的属性和方法。这样看来String Object和Literal本质上是不同的。 
+
+package jdk.lang;
+public class StringTest {
+	public static void main(String[] args) {
+		String s1 = "abc";
+		String s2 = "abc";
+		String s3 = s1 + s2;
+		String s4 = "abc" + "abc";
+		String s5 = "ab" + "cabc";
+		System.out.println(s3 == s4);
+		System.out.println(s4 == s5);
+        }
+}
+输出：false true。上面的程序，"abc" + "abc"是常量运算表达式constant expression。编译器就可以计算出值了，这就是编译时计算。同时这个表达式会被看做是string literal。但是：String s3 = s1+s2；那么s3的值就只能在运行的时候才能确定，这就是运行时计算。可见运行时会创建一个新的String，并且不会被当成string literal。 
+
+
+package jdk.lang;
+public class StringTest {
+	public static void main(String[] args) {
+		String s1 = "abc";
+		String s2 = "abc";
+		String s3 = s1 + s2;
+		String s4 = s3.intern();
+		String s5 = "ab" + "cabc";
+		System.out.println(s4 == s5);
+		System.out.println(s3 == s5);
+                System.out.println(s3.intern() == s3);
+		System.out.println(s3.intern() == s4);
+		System.out.println(s5.intern() == s5);
+        }
+}
+
+输出： true false false true true。s4是一个新的引用，这个引用和s5一样，但是和s3不同。也就是说，intern的时候创建了一个新的对象。但是不是每次都新建一个，只要有了，就会返回存在的。最后两个结果就说明了这点。 
+(s3.intern()在常量池，s3在堆)
+
+GC是不会收集Literal Pool的。但是会收集没有intern的String 变量对象。对上面的例子，s3会被回收，s4就不会。 
